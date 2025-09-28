@@ -1,0 +1,35 @@
+[tool.scripts]
+# AI服务开发脚本配置
+# 使用方法: python -m scripts <script_name>
+
+[tool.scripts.dev]
+description = "启动开发服务器"
+command = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+
+[tool.scripts.prod]
+description = "启动生产服务器"
+command = "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"
+
+[tool.scripts.test]
+description = "运行测试套件"
+command = "pytest tests/ -v"
+
+[tool.scripts.format]
+description = "格式化代码"
+command = "ruff format ."
+
+[tool.scripts.lint]
+description = "检查代码风格"
+command = "ruff check . --fix"
+
+[tool.scripts.check]
+description = "完整代码检查"
+command = ["ruff format .", "ruff check . --fix"]
+
+[tool.scripts.clean]
+description = "清理缓存文件"
+command = "find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true"
+
+[tool.scripts.health]
+description = "健康检查"
+command = "curl -s http://localhost:8000/ping"

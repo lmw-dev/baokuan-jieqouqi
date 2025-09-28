@@ -1,0 +1,26 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*]
+# 缩进风格：使用空格
+indent_style = space
+# 缩进大小：2个空格 (这是Web开发的通用标准)
+indent_size = 2
+# 换行符：使用LF (Unix/macOS标准)
+end_of_line = lf
+# 字符集：使用utf-8
+charset = utf-8
+# 去除行尾多余的空格
+trim_trailing_whitespace = true
+# 在文件末尾插入一个空行
+insert_final_newline = true
+
+[*.py]
+# 针对Python文件，遵循PEP 8规范，使用4个空格缩进
+indent_size = 4
+
+[*.md]
+# 针对Markdown文件，不过度处理行尾空格，因为两个空格换行是有效语法
+trim_trailing_whitespace = false

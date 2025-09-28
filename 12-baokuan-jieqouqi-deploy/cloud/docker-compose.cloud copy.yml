@@ -1,0 +1,119 @@
+# 云端部署配置文件
+# Docker Compose 行为说明：
+# - docker-compose build：根据 build 配置构建镜像，并用 image 字段的名称标记
+# - docker-compose up：如果本地有镜像就使用，没有则先构建
+# - docker-compose pull：从远程仓库拉取 image 字段指定的镜像
+
+services:
+  # 1. 数据库服务 (PostgreSQL)
+  db:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - services_network
+
+  # 2. Redis服务 (为Logto使用)
+  redis_logto:
+    image: redis:7-alpine
+    container_name: redis_for_logto
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - services_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # 3. Logto认证服务
+  logto:
+    image: svhd/logto
+    container_name: logto_auth_service
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe 2>/dev/null || echo 'Database already initialized or seed failed, continuing...' && npm start"]
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    depends_on:
+      db:
+        condition: service_started
+      redis_logto:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/baokuan_logto
+      - REDIS_URL=redis://redis_logto:6379/0
+      - ENDPOINT=http://43.142.178.200:3001
+      - ADMIN_ENDPOINT=http://43.142.178.200:3002
+      - TRUST_PROXY_HEADER=1
+      - PORT=3001
+      - ADMIN_PORT=3002
+    networks:
+      - services_network
+
+  # 4. AI后端服务 (FastAPI)
+  ai:
+    # 构建配置：从代码构建镜像
+    build:
+      context: ../../11-baokuan-jieqouqi-ai
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+    # 镜像名称：构建时标记的名称，也是从TCR拉取的镜像名
+    image: ccr.ccs.tencentyun.com/baokuan-jieqouqi/ai:latest
+    container_name: fast_api_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    restart: unless-stopped
+    networks:
+      - services_network
+
+  # 5. Web前端服务 (Next.js)
+  web:
+    # 构建配置：从代码构建镜像
+    build:
+      context: ../../10-baokuan-jieqouqi-web
+      dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: https://registry.npmmirror.com
+      platforms:
+        - linux/amd64
+    # 镜像名称：构建时标记的名称，也是从TCR拉取的镜像名
+    image: ccr.ccs.tencentyun.com/baokuan-jieqouqi/web:latest
+    container_name: next_web_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ai
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXT_PUBLIC_API_URL=http://ai:8000
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+    restart: unless-stopped
+    networks:
+      - services_network
+    
+volumes:
+  db_data:
+  redis_data:
+  logto_data:
+
+networks:
+  services_network:
+    driver: bridge

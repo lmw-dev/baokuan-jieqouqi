@@ -1,0 +1,58 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+/coverage
+.nyc_output
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+*.log
+debug
+lerna-debug.log*
+
+# Local env files
+.env*.local
+
+# IDE
+.vscode
+.idea
+
+# OS generated files
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Documentation
+README.md
+docs/
+
+# Temporary files
+temp*/
+*.tmp
+
+# Source maps
+*.map
+
+# Prisma
+prisma/migrations/

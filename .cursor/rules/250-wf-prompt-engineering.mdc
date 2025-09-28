@@ -1,0 +1,313 @@
+# Rule: High-Efficiency Cursor AI Prompt Design Guide
+
+## Description
+This rule guides the AI in generating a structured, context-rich, and effective prompt for code generation, based on a Task Development Document.
+
+## AI Action
+When prompted to generate a final "AI Instruction Prompt" for a task, your primary action is to **create a new Markdown file**.
+
+- **File Location**: The new file **must** be saved in the `/docs/prompts/` directory at the monorepo root.
+- **File Naming**: The filename **must** follow the format: `[Task-ID].prompt.[task-title-in-kebab-case].md`
+  - **Example**: `TOM-199.prompt.user-authentication-system.md`
+
+The content of this new file must follow the standard prompt structure template below.
+
+---
+
+# 高效Cursor AI Prompt设计指南
+
+## 🎯 核心原则 (Core Principles)
+
+### 1. 明确性原则 (Clarity Principle)
+- **目标明确**: 每个prompt必须有清晰的目标和验收标准
+- **指令具体**: 避免模糊表述，使用具体的技术术语和要求
+- **上下文完整**: 提供充分的背景信息和依赖关系
+
+### 2. 结构化原则 (Structure Principle)
+- **统一格式**: 所有prompt遵循统一的结构模板
+- **层次清晰**: 使用标题、子标题和列表组织内容
+- **逻辑顺序**: 按照理解→要求→实现→验证的顺序组织
+
+### 3. 可操作性原则 (Actionability Principle)
+- **步骤明确**: 提供清晰的实现步骤和优先级
+- **示例丰富**: 包含代码示例、接口定义和测试用例
+- **检查清单**: 提供完成检查清单确保质量
+
+## 📋 标准Prompt结构模板
+
+### 必需部分 (Required Sections)
+
+#### 1. 目标部分 (🎯 Objective)
+`## 🎯 目标 (Objective)`
+`**Linear Issue**: [任务ID] - [任务标题]`
+`**父Feature**: [父任务信息]`
+`**关键验收标准参考**: [具体的AC条件]`
+`**核心指令**: [一句话描述要完成的核心任务]`
+
+#### 2. 上下文参考 (📋 Context References)
+`## 📋 上下文参考 (Context References)`
+
+`### 主要操作文件`
+`- 核心文件: @path/to/main-file.ts (待创建/已存在)`
+`- 相关文件: @path/to/related-file.ts`
+
+`### 依赖的现有服务 (必须验证接口)`
+`- 服务名: @path/to/existing-service.ts`
+`- 工具类: @path/to/utility.ts`
+`- **重要**: 使用前必须通过 \`grep_search\` 或 \`codebase_search\` 验证接口方法名和签名`
+
+`### 需要遵循的内部规则`
+`- 规则1: @.cursor/rules/rule-name.mdc`
+`- 规则2: @.cursor/rules/another-rule.mdc`
+
+`### 接口依赖检查清单 (🔍 Interface Verification)`
+`- [ ] 已搜索并确认现有服务的接口定义`
+`- [ ] 已验证方法名称和参数类型`
+`- [ ] 已检查返回类型和错误处理`
+`- [ ] 已查看现有调用示例`
+
+#### 3. 具体要求与约束 (🔧 Requirements & Constraints)
+`## 🔧 具体要求与约束 (Requirements & Constraints)`
+
+`### 技术栈约束`
+`- **语言**: TypeScript (strict mode)`
+`- **架构模式**: [具体的设计模式]`
+`- **性能要求**: [具体的性能指标]`
+
+`### 功能要求`
+`[详细的功能规范和约束条件]`
+
+`### 质量标准`
+`[测试覆盖率、性能指标等质量要求]`
+
+`### 类型安全要求 (🛡️ Type Safety)`
+`- **类型优先设计**: 先定义完整的TypeScript接口，再实现功能`
+`- **接口一致性**: 确保类型定义与实际实现完全匹配`
+`- **测试驱动**: 编写测试用例时明确期望的数据结构`
+`- **边界条件**: 考虑undefined、null、空数组等边界情况的类型处理`
+
+#### 4. 期望输出结构 (📝 Expected Output Structure)
+`## 📝 期望输出结构 (Expected Output Structure)`
+
+`### 1. 核心类/接口`
+`// 提供具体的代码结构示例`
+`export class ExampleClass {`
+`  // 方法签名和注释`
+`}`
+
+
+`### 2. 类型定义`
+`// 完整的TypeScript接口定义`
+`export interface ExampleInterface {`
+`  // 属性和方法定义`
+`}`
+
+
+#### 5. 实现步骤 (🔄 Implementation Steps)
+`## 🔄 实现步骤 (Implementation Steps)`
+
+`### 第0步: 前期验证 (优先级: 最高) ⚠️ 必须执行`
+`1. **接口依赖验证**: 使用 \`grep_search\` 或 \`codebase_search\` 确认所有依赖服务的接口`
+`2. **类型定义检查**: 搜索现有相关类型定义，确保新类型与现有系统兼容`
+`3. **测试用例设计**: 先设计测试用例，明确期望的输入输出和数据结构`
+
+`### 第1步: [步骤名称] (优先级: 最高/高/中/低)`
+`1. 具体任务1`
+`2. 具体任务2`
+`3. 具体任务3`
+
+`### 第2步: [步骤名称] (优先级: 最高/高/中/低)`
+`[详细的实现指导]`
+
+#### 6. 测试策略 (🧪 Testing Strategy) **必需部分**
+`## 🧪 测试策略 (Testing Strategy)`
+
+`### 单元测试要求 (必须完成)`
+`- **测试覆盖率目标**: 核心业务逻辑 ≥ 85%，组件测试 ≥ 80%`
+`- **关键测试场景**: 正常流程、边界条件、错误处理`
+`- **Mock策略**: 外部依赖必须mock，数据库调用必须mock`
+
+`### 集成测试要求 (必须完成)`
+`- **端到端测试场景**: 用户完整操作流程测试`
+`- **组件集成测试**: 组件间交互和数据传递验证`
+`- **性能测试要求**: 响应时间基准和负载测试`
+
+`### AI执行要求 (强制性)`
+`- [ ] **完成代码实现后，AI必须立即编写并运行单元测试**`
+`- [ ] **验证测试覆盖率达到要求标准**`
+`- [ ] **修复所有测试失败项，确保100%通过率**`
+`- [ ] **在Linear评论中报告测试结果和覆盖率数据**`
+
+#### 7. 完成检查清单 (🎉 Completion Checklist)
+`## 🎉 完成检查清单 (Completion Checklist)`
+
+`### 基础功能检查 (AI必须执行)`
+`- [ ] 功能实现完成`
+`- [ ] **单元测试编写完成并通过**`
+`- [ ] **集成测试编写完成并通过**`
+`- [ ] **测试覆盖率达到标准要求**`
+`- [ ] 性能基准达标`
+
+`### 质量保障检查 (基于TOM-109经验)`
+`- [ ] **接口调用验证**: 所有外部服务调用方法名和参数正确`
+`- [ ] **类型一致性检查**: TypeScript类型定义与实现完全匹配`
+`- [ ] **边界条件测试**: 测试用例覆盖null、undefined、空值等边界情况`
+`- [ ] **编译验证**: \`npm run build\` 无错误无警告`
+`- [ ] **测试执行验证**: \`npm test\` 完全通过`
+
+`### 文档和流程检查`
+`- [ ] 代码审查通过`
+`- [ ] 文档更新完成`
+`- [ ] **Linear任务状态更新并附带测试报告**`
+
+### 可选部分 (Optional Sections)
+
+#### 重要注意事项 (�� Important Notes)
+`## 🚨 重要注意事项 (Important Notes)`
+
+`### 技术风险`
+`- 风险点1及缓解措施`
+`- 风险点2及缓解措施`
+
+`### 最佳实践`
+`- 实践1`
+`- 实践2`
+
+`### 常见Bug预防 (基于TOM-109调试经验)`
+`#### 1. 接口依赖错误预防`
+`- ❌ **错误做法**: 假设方法名 \`this.aiService.generateResponse()\`
+`- ✅ **正确做法**: 先搜索接口 \`grep_search "class AIService"\` 确认方法名为 \`sendMessage()\`
+
+`#### 2. 类型定义不一致预防`
+`- ❌ **错误做法**: 实现后再调整类型定义`
+`- ✅ **正确做法**: 先定义完整接口，再按接口实现功能`
+
+`#### 3. 批量处理逻辑错误预防`
+`- ❌ **错误做法**: 忽略边界条件（空数组、无效数据）`
+`- ✅ **正确做法**: 先考虑所有边界情况，再实现核心逻辑`
+
+`#### 4. 测试与实现不匹配预防`
+`- ❌ **错误做法**: 测试期望 \`> 70\`，实现判断 \`< 70\`
+`- ✅ **正确做法**: 明确业务需求的边界条件，统一测试和实现逻辑`
+
+## 🔧 Prompt质量标准
+
+### 1. 完整性检查
+`- [ ] 包含所有必需部分`
+`- [ ] 上下文引用准确（使用@符号）`
+`- [ ] 代码示例完整可运行`
+`- [ ] 验收标准明确可测`
+
+### 2. 准确性检查
+`- [ ] 技术术语使用正确`
+`- [ ] 文件路径引用准确`
+`- [ ] 依赖关系描述正确`
+`- [ ] 性能指标合理`
+
+### 3. 可操作性检查
+`- [ ] 实现步骤具体明确`
+`- [ ] 优先级标注清晰`
+`- [ ] 检查清单完整`
+`- [ ] 错误处理考虑周全`
+
+## 📚 最佳实践示例
+
+### 1. 文件引用规范
+`# 正确的引用方式`
+`- 现有文件: @src/services/AIService.ts`
+`- 待创建文件: @src/services/new-service.ts (待创建)`
+`- 规则文件: @.cursor/rules/typescript-standards.mdc`
+
+`# 错误的引用方式`
+`- src/services/AIService.ts (缺少@符号)`
+`- @src/services/ai-service.ts (文件名不匹配)`
+
+### 2. 代码示例规范
+`# 提供完整的接口定义`
+`export interface ServiceInterface {`
+`  // 详细的方法签名`
+`  methodName(param: Type): Promise<ReturnType>;`
+  
+`  // 包含注释说明`
+`  anotherMethod(param: Type): Type;`
+`}`
+
+`# 提供实现示例`
+`export class ServiceImplementation implements ServiceInterface {`
+`  async methodName(param: Type): Promise<ReturnType> {`
+`    // 实现逻辑注释`
+`    return result;`
+`  }`
+`}`
+
+### 3. 验收标准规范
+`# 具体可测的标准`
+`- [ ] 单元测试覆盖率达到80%以上`
+`- [ ] API响应时间≤500ms`
+`- [ ] 支持并发用户数≥100`
+
+`# 避免模糊的标准`
+`- [ ] 代码质量良好`
+`- [ ] 性能表现优秀`
+`- [ ] 用户体验友好`
+
+## 🔄 Prompt迭代优化
+
+### 1. 反馈收集
+`- 使用\`mcp_interactive-feedback-mcp_interactive_feedback\`收集反馈`
+`- 记录常见问题和改进点`
+`- 跟踪实现过程中的困难`
+
+### 2. 持续改进
+`- 根据实际执行效果调整prompt结构`
+`- 更新最佳实践和示例`
+`- 完善错误处理和边界情况`
+
+### 3. 版本管理
+`- 为重要的prompt变更创建版本记录`
+`- 保留成功的prompt模板供复用`
+`- 建立prompt质量评估机制`
+
+## 🎯 特定场景指导
+
+### 1. 新功能开发Prompt
+`- 重点关注架构设计和接口定义`
+`- 提供详细的实现步骤和依赖关系`
+`- 包含完整的测试策略`
+
+### 2. Bug修复Prompt
+`- 明确问题描述和重现步骤`
+`- 提供根因分析指导`
+`- 包含回归测试要求`
+
+### 3. 重构Prompt
+`- 明确重构目标和约束条件`
+`- 提供向后兼容性要求`
+`- 包含性能对比基准`
+
+### 4. 集成Prompt
+`- 详细描述集成点和数据流`
+`- 提供错误处理和重试机制`
+`- 包含端到端测试场景`
+
+## 📊 Prompt效果评估
+
+### 1. 成功指标
+`- 首次实现成功率 ≥ 80%`
+`- 代码质量评分 ≥ 4.0/5.0`
+`- 实现时间符合预期 ≥ 90%`
+
+### 2. 质量指标
+`- 测试覆盖率达标率 ≥ 90%`
+`- 性能基准达标率 ≥ 95%`
+`- 代码审查通过率 ≥ 95%`
+
+### 3. 持续改进
+`- 定期回顾prompt效果`
+`- 收集开发者反馈`
+`- 更新最佳实践指南`
+
+### 3. 持续改进
+`- 定期回顾prompt效果`
+`- 收集开发者反馈`
+`- 更新最佳实践指南`

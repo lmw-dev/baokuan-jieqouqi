@@ -1,0 +1,56 @@
+---
+description: "Defines the standard strategy for handling and responding to errors in our FastAPI backend service."
+globs: **/*.py
+alwaysApply: false
+---
+# Rule: Backend Error Handling Specification (v2.0)
+
+## 1. Core Principles
+1.  **Never Crash:** The server must catch all foreseeable errors gracefully. [cite: 122]
+2.  **Standard Response Format:** Adhere to the `ApiResponse` format defined in `110-spec-api-design.mdc`. [cite: 123]
+3.  **Distinguish & Log Errors:** Correctly use 4xx for client errors and 5xx for server errors. Log all 5xx errors with full stack traces. [cite: 124, 125]
+4.  **No Sensitive Data Leakage:** Client-facing error messages must be generic and safe. [cite: 126]
+
+## 2. FastAPI Implementation Pattern
+
+### 2.1 Custom Exception Classes
+Create custom exception classes inheriting from a base `APIException`. Each exception must contain its business `code` and the corresponding `status_code`. 
+**Example (`app/core/exceptions.py`):**
+```python
+from starlette import status
+
+class APIException(Exception):
+    def __init__(self, code: int, status_code: int, message: str = "An error occurred"):
+        self.code = code
+        self.status_code = status_code
+        self.message = message
+
+class InvalidParameterError(APIException):
+    def __init__(self, message: str = "Invalid parameters"):
+        super().__init__(code=2001, status_code=status.HTTP_400_BAD_REQUEST, message=message)
+
+class NotAuthenticatedError(APIException):
+    def __init__(self, message: str = "Authentication failed"):
+        super().__init__(code=4001, status_code=status.HTTP_401_UNAUTHORIZED, message=message)
+````
+
+### 2.2 Centralized Exception Handler
+
+Use `@app.exception_handler` to catch exceptions and format the standard JSON response. 15
+
+Example (main.py):
+
+``` Python
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from .core.exceptions import APIException
+
+app = FastAPI()
+
+@app.exception_handler(APIException)
+async def api_exception_handler(request: Request, exc: APIException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={ "code": exc.code, "message": exc.message, "data": None }
+    )
+```

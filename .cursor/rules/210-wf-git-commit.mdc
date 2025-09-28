@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule: Git Commit Message Specification
+
+## Description
+This rule enforces the Conventional Commits specification for all Git commit messages. Use it to generate or validate commit messages.
+
+## Implementation Details
+
+The commit message must follow this strict format: `<type>(<scope>): <subject>`
+
+### **Type**
+The `type` must be one of the following lowercase strings:
+- `feat`: A new feature for the user.
+- `fix`: A bug fix for the user.
+- `chore`: Changes to the build process, auxiliary tools, or other chores that don't affect user-facing code.
+- `docs`: Documentation only changes.
+- `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc).
+- `refactor`: A code change that neither fixes a bug nor adds a feature.
+- `perf`: A code change that improves performance.
+- `test`: Adding missing tests or correcting existing tests.
+- `ci`: Changes to our CI configuration files and scripts.
+
+### **Scope (Optional)**
+The `scope` is a noun describing the section of the codebase affected. Examples: `web`, `ai`, `db`, `auth`, `ui`, `api`.
+
+### **Subject**
+- **Must** start with a lowercase letter.
+- **Must not** end with a period.
+- **Must** be a short, imperative description of the change (e.g., "add login button" not "added login button").
+- **Must** be 50 characters or less.
+
+### **Examples**
+
+**Good:**
+- `feat(auth): implement password reset endpoint`
+- `fix(ui): correct button alignment on mobile`
+- `docs: update user guide for v1.1.0`
+- `chore(deps): upgrade Next.js to latest version`
+
+**Bad:**
+- `fix: Fixed a bug` (Subject starts with a capital letter and is not descriptive)
+- `feature: user login` (Type "feature" is not a valid type, should be "feat")
+- `refactor(core): refactoring the core logic.` (Subject ends with a period)
+
+---
+*Source of Truth: [[指南 - Git工作流与提交规范]]*

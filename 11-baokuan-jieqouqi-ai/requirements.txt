@@ -1,0 +1,41 @@
+annotated-types==0.7.0
+anyio==4.9.0
+click==8.2.1
+fastapi==0.115.13
+h11==0.16.0
+httptools==0.6.4
+idna==3.10
+loguru==0.7.3
+pydantic==2.11.7
+pydantic_core==2.33.2
+pydantic-settings==2.5.2
+python-dotenv==1.1.1
+PyYAML==6.0.2
+ruff==0.12.1
+sniffio==1.3.1
+starlette==0.46.2
+typing-inspection==0.4.1
+typing_extensions==4.14.0
+uvicorn==0.34.3
+uvloop==0.21.0
+watchfiles==1.1.0
+websockets==15.0.1
+
+# 腾讯云SDK
+tencentcloud-sdk-python==3.0.1417
+cos-python-sdk-v5==1.9.37
+
+# 数据库
+sqlalchemy==2.0.32
+asyncpg==0.29.0
+alembic==1.13.2
+
+# 测试
+pytest==8.3.3
+pytest-asyncio==0.25.0
+pytest-cov==5.0.0
+httpx==0.28.0
+
+# 工具
+python-multipart==0.0.17
+aiofiles==24.1.0

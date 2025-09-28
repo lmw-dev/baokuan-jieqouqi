@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爆款解构器 - 统一分析接口测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 20px;
+        }
+        .test-section h2 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+        }
+        .loading {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+        }
+        .analysis-result {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .analysis-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 4px solid #3b82f6;
+            background: white;
+        }
+        .analysis-section h4 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        .tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 爆款解构器 - 统一分析接口测试</h1>
+        
+        <!-- 视频分析测试 -->
+        <div class="test-section">
+            <h2>🎬 视频分析接口测试</h2>
+            <p><strong>接口:</strong> POST /api/v1/analysis/video</p>
+            <p>基于已上传的媒体文件进行完整的三段式AI分析</p>
+            
+            <div>
+                <label for="mediaFileId">媒体文件ID:</label>
+                <input type="text" id="mediaFileId" placeholder="5dc84e16-ac2c-4dc2-84b1-dffc316beb29" value="5dc84e16-ac2c-4dc2-84b1-dffc316beb29" style="width: 100%; padding: 8px; margin: 5px 0;">
+            </div>
+            
+            <div>
+                <label>
+                    <input type="checkbox" id="forceReprocess"> 强制重新处理媒体文件
+                </label>
+            </div>
+            
+            <button onclick="analyzeVideo()" id="videoAnalyzeBtn">🎬 分析视频</button>
+            <div id="videoResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 重新分析测试 -->
+        <div class="test-section">
+            <h2>🔄 重新分析接口测试</h2>
+            <p><strong>接口:</strong> PUT /api/v1/analysis/retry/{media_file_id}</p>
+            <p>对已存在的媒体文件进行重新分析，支持创建多版本分析卡片</p>
+            
+            <div>
+                <label for="retryMediaFileId">媒体文件ID:</label>
+                <input type="text" id="retryMediaFileId" placeholder="5dc84e16-ac2c-4dc2-84b1-dffc316beb29" value="5dc84e16-ac2c-4dc2-84b1-dffc316beb29" style="width: 100%; padding: 8px; margin: 5px 0;">
+            </div>
+            
+            <div>
+                <label>
+                    <input type="checkbox" id="forceNewCard" checked> 强制创建新分析卡片（多版本分析）
+                </label>
+            </div>
+            
+            <button onclick="retryAnalysis()" id="retryAnalyzeBtn">🔄 重新分析</button>
+            <div id="retryResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 文案分析测试 -->
+        <div class="test-section">
+            <h2>📝 文案分析接口测试</h2>
+            <p><strong>接口:</strong> POST /api/v1/analysis/text</p>
+            <p>输入一段文案内容，获得完整的三段式AI分析结果</p>
+            
+            <div>
+                <label for="textContent">文案内容:</label>
+                <textarea id="textContent" placeholder="请输入要分析的文案内容...">作为一个做了5年电商的资深卖家，我今天要分享一个让99%新手都忽略的致命错误。这个错误让无数人亏光了启动资金，但掌握了正确方法，你就能在3个月内实现月入过万。作为行业专家，我不能眼睁睁看着新人重蹈覆辙。</textarea>
+            </div>
+            
+            <div>
+                <label for="textTitle">标题 (可选):</label>
+                <input type="text" id="textTitle" placeholder="电商新手避坑指南" style="width: 100%; padding: 8px; margin: 5px 0;">
+            </div>
+            
+            <button onclick="analyzeText()" id="textAnalyzeBtn">🔍 开始分析</button>
+            <div id="textResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 健康检查测试 -->
+        <div class="test-section">
+            <h2>❤️ 服务健康检查</h2>
+            <p><strong>接口:</strong> GET /api/v1/analysis/health</p>
+            <button onclick="checkHealth()" id="healthBtn">🩺 检查服务状态</button>
+            <div id="healthResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        async function analyzeVideo() {
+            const btn = document.getElementById('videoAnalyzeBtn');
+            const result = document.getElementById('videoResult');
+            const mediaFileId = document.getElementById('mediaFileId').value.trim();
+            const forceReprocess = document.getElementById('forceReprocess').checked;
+
+            if (!mediaFileId) {
+                alert('请输入媒体文件ID');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '🔄 分析中...';
+            result.style.display = 'block';
+            result.className = 'result loading';
+            result.textContent = '正在进行视频分析（包含媒体处理和AI分析），请稍候...';
+
+            try {
+                const response = await fetch(`${API_BASE}/analysis/video`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        media_file_id: mediaFileId,
+                        user_id: 'test-user-web',
+                        force_reprocess: forceReprocess
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = formatAnalysisResult(data.data);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `视频分析失败: ${data.message || JSON.stringify(data)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `网络错误: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎬 分析视频';
+            }
+        }
+
+        async function retryAnalysis() {
+            const btn = document.getElementById('retryAnalyzeBtn');
+            const result = document.getElementById('retryResult');
+            const mediaFileId = document.getElementById('retryMediaFileId').value.trim();
+            const forceNewCard = document.getElementById('forceNewCard').checked;
+
+            if (!mediaFileId) {
+                alert('请输入媒体文件ID');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '🔄 重新分析中...';
+            result.style.display = 'block';
+            result.className = 'result loading';
+            result.textContent = '正在重新分析（复用已有transcript），请稍候...';
+
+            try {
+                const response = await fetch(`${API_BASE}/analysis/retry/${mediaFileId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'test-user-web',
+                        force_new_card: forceNewCard
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = formatAnalysisResult(data.data);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `重新分析失败: ${data.message || JSON.stringify(data)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `网络错误: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 重新分析';
+            }
+        }
+
+        async function analyzeText() {
+            const btn = document.getElementById('textAnalyzeBtn');
+            const result = document.getElementById('textResult');
+            const content = document.getElementById('textContent').value.trim();
+            const title = document.getElementById('textTitle').value.trim();
+
+            if (!content) {
+                alert('请输入文案内容');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '🔄 分析中...';
+            result.style.display = 'block';
+            result.className = 'result loading';
+            result.textContent = '正在调用AI进行三段式分析，请稍候...';
+
+            try {
+                const response = await fetch(`${API_BASE}/analysis/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        title: title || null,
+                        user_id: 'test-user-web'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = formatAnalysisResult(data.data);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `分析失败: ${data.message || '未知错误'}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `网络错误: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔍 开始分析';
+            }
+        }
+
+        async function checkHealth() {
+            const btn = document.getElementById('healthBtn');
+            const result = document.getElementById('healthResult');
+
+            btn.disabled = true;
+            btn.textContent = '🔄 检查中...';
+            result.style.display = 'block';
+            result.className = 'result loading';
+            result.textContent = '正在检查服务状态...';
+
+            try {
+                const response = await fetch(`${API_BASE}/analysis/health`);
+                const data = await response.json();
+
+                result.className = 'result success';
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `健康检查失败: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🩺 检查服务状态';
+            }
+        }
+
+        function formatAnalysisResult(data) {
+            const analysis = data.analysis_result;
+            const sourceInfo = data.source_info;
+            
+            return `
+                <div class="analysis-result">
+                    <h3>📊 三段式分析结果</h3>
+                    
+                    <div class="analysis-section">
+                        <h4>🎯 信任之钩 (Trust Hook)</h4>
+                        <p><strong>钩子文案:</strong> ${analysis.trust_hook.hook_copy}</p>
+                        <p><strong>可信度证明:</strong> ${analysis.trust_hook.credibility_testimony || '暂无'}</p>
+                        <p><strong>权威信号:</strong> ${analysis.trust_hook.authority_signals.map(signal => `<span class="tag">${signal}</span>`).join('')}</p>
+                    </div>
+
+                    <div class="analysis-section">
+                        <h4>💝 共情之锚 (Empathy Anchor)</h4>
+                        <p><strong>痛点:</strong> ${analysis.empathy_anchor.pain_point}</p>
+                        <p><strong>目标受众:</strong> ${analysis.empathy_anchor.target_audience}</p>
+                        <p><strong>情感触发器:</strong> ${analysis.empathy_anchor.emotional_triggers.map(trigger => `<span class="tag">${trigger}</span>`).join('')}</p>
+                    </div>
+
+                    <div class="analysis-section">
+                        <h4>💎 价值图谱 (Value Map)</h4>
+                        <p><strong>核心价值:</strong> ${analysis.value_map.core_value}</p>
+                        <p><strong>价值交付:</strong> ${analysis.value_map.value_delivery.map(value => `<span class="tag">${value}</span>`).join('')}</p>
+                        <p><strong>竞争优势:</strong> ${analysis.value_map.competitive_advantage}</p>
+                    </div>
+
+                    <div class="analysis-section">
+                        <h4>ℹ️ 处理信息</h4>
+                        <p><strong>处理时间:</strong> ${sourceInfo.processing_time_ms}ms</p>
+                        <p><strong>数据库记录:</strong> Source ID: ${sourceInfo.source_id.substring(0, 8)}..., Card ID: ${sourceInfo.card_id.substring(0, 8)}...</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+---
+description: "Defines the testing strategy and best practices for both frontend and backend services."
+globs: **/*.test.ts,**/*.test.tsx,**/test_*.py
+alwaysApply: false
+---
+
+# Rule: Testing Guide and Strategy (v2.0)
+
+*Note: This guide defines **how** to write tests. Our core development workflow, `[[SOP - Vibe Coding 端到端开发工作流 V3.0]]`, defines **when** to write them (Test-First).*
+
+## 1. General Testing Principles
+- [cite_start]**Test Behavior, Not Implementation:** Tests should verify public-facing behavior, not internal details. [cite: 34]
+- [cite_start]**Clear Descriptions:** Test cases should have clear, human-readable descriptions. [cite: 35]
+- [cite_start]**AAA Pattern:** Structure tests using the Arrange-Act-Assert pattern. [cite: 36]
+
+## 2. Frontend Testing (web - Next.js)
+- [cite_start]**Tools:** **Vitest** and **React Testing Library (RTL)**. [cite: 39]
+- [cite_start]**Focus:** Unit test complex hooks and utilities; integration test user flows. [cite: 40, 41]
+- [cite_start]**Querying:** Always prefer user-facing queries like `getByRole` and `getByLabelText`. [cite: 43]
+
+## 3. Backend Testing (ai - FastAPI)
+- [cite_start]**Tools:** **Pytest**. [cite: 45]
+- [cite_start]**Focus:** Our primary focus is **integration testing API endpoints** using FastAPI's `TestClient`. [cite: 46, 47]
+- [cite_start]**API Endpoint Test Strategy:** For each endpoint, test the "happy path" (2xx status) and expected error cases (4xx status). [cite: 48, 49]
+- **Dependencies:** Tests should **not** interact with the real database or external APIs. [cite_start]Use mocking/patching to simulate their responses. [cite: 52]

@@ -1,0 +1,316 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+  url      = env("DATABASE_URL")
+}
+
+/// 用户模型
+model User {
+  /// 通用唯一标识符 (UUID)
+  id          String   @id @default(uuid())
+  /// 用户邮箱，可选，唯一
+  email       String?  @unique
+  /// 用户手机号，可选，唯一
+  phoneNumber String?  @unique
+  /// 用户昵称
+  name        String?
+  /// 用户头像URL
+  image       String?
+  /// Logto用户ID，用于关联认证服务，可选（兼容历史用户）
+  logtoId     String?  @unique
+  /// 创建时间
+  createdAt   DateTime @default(now())
+  /// 最后更新时间
+  updatedAt   DateTime @updatedAt
+
+  /// 关系字段：一个用户可以创建多个分析源
+  sources AnalysisSource[]
+  /// 关系字段：一个用户可以拥有多个上传会话
+  uploadSessions UploadSession[]
+  /// 关系字段：一个用户可以创建多个脚本
+  scripts Script[]
+  /// 关系字段：一个用户可以编辑多个脚本历史记录
+  scriptEditHistory ScriptEditHistory[]
+}
+
+/// 媒体文件模型 (用于追踪上传到COS的文件)
+model MediaFile {
+  id              String   @id @default(uuid())
+  /// 创建时间
+  createdAt       DateTime @default(now())
+  
+  /// 原始文件名
+  originalFilename String
+  /// 在COS中的存储路径/Key
+  storagePath      String
+  /// 文件大小 (bytes)
+  fileSize         Int
+  /// 文件MIME类型 (e.g., 'video/mp4')
+  mimeType         String
+  
+  /// 上传及处理状态 (e.g., 'uploading', 'processing', 'ready')
+  status           String
+  
+  /// 关系字段：与分析源是一对一关系
+  source           AnalysisSource?
+
+  // 扩展字段
+  fileHash      String?   @unique  // SHA-256哈希值，用于文件去重和秒传
+  thumbnailUrl  String?
+  uploadSessions UploadSession[]
+}
+
+/// 分析源模型 (记录每次分析的来源)
+model AnalysisSource {
+  id            String   @id @default(uuid())
+  /// 创建时间
+  createdAt     DateTime @default(now())
+
+  /// 用户为本次分析所命名的标题
+  title         String
+  
+  /// 分析源的类型
+  sourceType    SourceType
+  /// 根据源类型，存储URL链接或用户直接粘贴的原始文案
+  sourceContent String
+
+  /// 通过视频文件或URL解析出的最终文案，可用于后续分析
+  transcript    String?    @db.Text
+  
+  /// 关系字段：分析源的所有者
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId       String
+
+  /// 关系字段：如果源是文件，则关联到媒体文件记录
+  mediaFile     MediaFile? @relation(fields: [mediaFileId], references: [id])
+  mediaFileId   String?    @unique
+
+  /// 关系字段：一个分析源可以生成多份分析卡片
+  analysisCards AnalysisCard[]
+  /// 关系字段：一个分析源可以生成多个脚本
+  scripts Script[]
+}
+
+/// 分析卡片模型 (记录具体的分析结果)
+model AnalysisCard {
+  id               String    @id @default(uuid())
+  /// 创建时间
+  createdAt        DateTime  @default(now())
+  /// 最后更新时间
+  updatedAt        DateTime  @updatedAt
+
+  /// 本次分析的版本标题, e.g., "AI初稿", "我的精修版 v2"
+  versionTitle     String
+  
+  // --- 核心分析字段 ---
+  /// 钩子文案
+  hookCopy         String?
+  /// 钩子类型标签数组
+  hookTypes        String[]  @default([])
+  /// 钩子笔记
+  hookNotes        String?
+  
+  /// 核心观点/金句
+  coreIdea         String?
+  /// 论证/案例
+  argumentCase     String?
+  
+  /// 价值交付物标签数组
+  valueDelivery    String[]  @default([])
+  /// 可复用要素
+  reusableElements String?
+  /// 价值点笔记
+  valueNotes       String?
+  
+  /// 关系字段：本分析卡片隶属于哪个分析源
+  source   AnalysisSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceId String
+  /// 关系字段：一个分析卡片可以生成多个脚本
+  scripts  Script[]
+}
+
+/// 枚举：定义分析源的类型
+enum SourceType {
+  URL
+  FILE
+  TEXT
+}
+
+model UploadSession {
+  id        String   @id @default(cuid())
+  userId    String
+  fileName  String
+  fileSize  BigInt
+  fileType  String
+  filePath  String   // COS存储路径
+  status    UploadStatus @default(PENDING)
+  progress  Int      @default(0) // 0-100
+  mediaFileId String? // 关联的MediaFile记录
+  cosUrl    String?  // 最终的COS访问URL
+  metadata  Json?    // 扩展元数据
+  errorMessage String?
+  fileHash  String?  // 文件哈希值，用于去重
+  chunkSize Int      @default(5242880) // 默认5MB
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime // 会话过期时间
+  
+  // 关联关系
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mediaFile MediaFile? @relation(fields: [mediaFileId], references: [id])
+  
+  @@map("upload_sessions")
+  @@index([userId])
+  @@index([status])
+  @@index([fileHash])
+}
+
+enum UploadStatus {
+  PENDING
+  UPLOADING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+/// 脚本状态枚举
+enum ScriptStatus {
+  DRAFT     // 草稿
+  PUBLISHED // 已发布
+  ARCHIVED  // 已归档
+}
+
+/// 脚本段落类型枚举
+enum ScriptSectionType {
+  HOOK     // 钩子
+  PROBLEM  // 问题
+  SOLUTION // 方案
+  PROOF    // 证明
+  CTA      // 召唤
+}
+
+/// 重要性级别枚举
+enum ImportanceLevel {
+  LOW    // 低
+  MEDIUM // 中
+  HIGH   // 高
+}
+
+/// 编辑操作类型枚举
+enum EditAction {
+  CREATE   // 创建
+  UPDATE   // 更新
+  DELETE   // 删除
+  GENERATE // 生成
+}
+
+/// 脚本模型 (记录脚本的基本信息)
+model Script {
+  id        String   @id @default(uuid())
+  /// 脚本标题
+  title     String   @db.VarChar(255)
+  /// 脚本状态
+  status    ScriptStatus @default(DRAFT)
+  /// 创建时间
+  createdAt DateTime @default(now())
+  /// 最后更新时间
+  updatedAt DateTime @updatedAt
+  
+  /// 关系字段：关联的分析卡片 (可选，兼容直接从源创建的脚本)
+  card      AnalysisCard? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  cardId    String?
+  
+  /// 关系字段：关联的分析源 (可选，兼容直接从卡片创建的脚本)
+  source    AnalysisSource? @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceId  String?
+  
+  /// 关系字段：脚本创建者
+  creator   User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId String
+  
+  /// 关系字段：脚本的段落内容
+  sections  ScriptSection[]
+  /// 关系字段：脚本的编辑历史
+  editHistory ScriptEditHistory[]
+  
+  @@map("scripts")
+  @@index([cardId])
+  @@index([sourceId])
+  @@index([creatorId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([updatedAt])
+}
+
+/// 脚本段落模型 (存储脚本的段落内容)
+model ScriptSection {
+  id           String   @id @default(uuid())
+  /// 段落类型
+  sectionType  ScriptSectionType
+  /// 段落标题
+  title        String   @db.VarChar(255)
+  /// 段落内容
+  content      String   @db.Text
+  /// 创作提示 (JSON格式)
+  tips         Json     @default("[]")
+  /// 时间范围
+  timeRange    String?  @db.VarChar(50)
+  /// 重要性级别
+  importance   ImportanceLevel @default(MEDIUM)
+  /// 排序索引
+  orderIndex   Int
+  /// 最后更新时间
+  updatedAt    DateTime @updatedAt
+  
+  /// 关系字段：所属脚本
+  script    Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  scriptId  String
+  
+  /// 关系字段：段落编辑历史
+  editHistory ScriptEditHistory[]
+  
+  @@map("script_sections")
+  @@unique([scriptId, sectionType], name: "uk_script_sections_script_type")
+  @@unique([scriptId, orderIndex], name: "uk_script_sections_script_order")
+  @@index([scriptId])
+  @@index([sectionType])
+  @@index([scriptId, orderIndex])
+  @@index([updatedAt])
+}
+
+/// 脚本编辑历史模型 (记录所有编辑操作的审计日志)
+model ScriptEditHistory {
+  id            String   @id @default(uuid())
+  /// 修改前的内容
+  contentBefore String?  @db.Text
+  /// 修改后的内容
+  contentAfter  String?  @db.Text
+  /// 操作类型
+  action        EditAction
+  /// 创建时间
+  createdAt     DateTime @default(now())
+  
+  /// 关系字段：所属脚本
+  script    Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  scriptId  String
+  
+  /// 关系字段：相关段落 (可选)
+  section   ScriptSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  sectionId String?
+  
+  /// 关系字段：操作者
+  creator   User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId String
+  
+  @@map("script_edit_history")
+  @@index([scriptId])
+  @@index([sectionId])
+  @@index([creatorId])
+  @@index([createdAt])
+  @@index([action])
+}

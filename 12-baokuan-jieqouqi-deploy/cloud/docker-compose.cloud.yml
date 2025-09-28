@@ -1,0 +1,151 @@
+# 云端部署配置文件
+# Docker Compose 行为说明：
+# - docker-compose build：根据 build 配置构建镜像，并用 image 字段的名称标记
+# - docker-compose up：如果本地有镜像就使用，没有则先构建
+# - docker-compose pull：从远程仓库拉取 image 字段指定的镜像
+
+# 云端部署配置文件 (V2 - 生产环境优化版)
+services:
+  # 1. 数据库服务 (PostgreSQL)
+  db:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init-logto-db.sql:/docker-entrypoint-initdb.d/init-logto-db.sql
+    ports:
+      - "5432:5432" # 恢复数据库端口暴露，方便IDE连接
+    restart: unless-stopped
+    networks:
+      - services_network
+
+  # 2. Redis服务 (为Logto使用)
+  redis_logto:
+    image: redis:7-alpine
+    container_name: redis_for_logto
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - services_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # 3. Logto认证服务
+  logto:
+    image: svhd/logto
+    container_name: logto_auth_service
+    # 移除了复杂的entrypoint，让镜像默认行为处理数据库初始化
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    depends_on:
+      db:
+        condition: service_started
+      redis_logto:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      # 使用独立的baokuan_logto数据库
+      - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/baokuan_logto
+      - REDIS_URL=redis://redis_logto:6379/0
+      # 修正：从.env文件读取正确的公网HTTPS地址
+      - ENDPOINT=${LOGTO_ENDPOINT}
+      - ADMIN_ENDPOINT=${ADMIN_ENDPOINT}
+      - TRUST_PROXY_HEADER=1
+      - PORT=3001
+      - ADMIN_PORT=3002
+    networks:
+      - services_network
+
+  # 4. AI后端服务 (FastAPI)
+  ai:
+    build:
+      context: ../../11-baokuan-jieqouqi-ai
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+    image: ccr.ccs.tencentyun.com/baokuan-jieqouqi/ai:latest
+    container_name: fast_api_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      # 数据库配置
+      - DATABASE_URL=${DATABASE_URL}
+      # 腾讯云COS配置
+      - COS_SECRET_ID=${COS_SECRET_ID}
+      - COS_SECRET_KEY=${COS_SECRET_KEY}
+      - COS_BUCKET=${COS_BUCKET}
+      - COS_REGION=${COS_REGION}
+      - COS_BASE_URL=${COS_BASE_URL}
+      # AI服务配置
+      - AI_PROVIDER=${AI_PROVIDER}
+      - AI_MODEL=${AI_MODEL}
+      - AI_API_KEY=${AI_API_KEY}
+      - AI_BASE_URL=${AI_BASE_URL}
+      - PROMPT_TEMPLATES_DIR=${PROMPT_TEMPLATES_DIR}
+    restart: unless-stopped
+    networks:
+      - services_network
+
+  # 5. Web前端服务 (Next.js)
+  web:
+    build:
+      context: ../../10-baokuan-jieqouqi-web
+      dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: https://registry.npmmirror.com
+      platforms:
+        - linux/amd64
+    image: ccr.ccs.tencentyun.com/baokuan-jieqouqi/web:latest
+    container_name: next_web_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ai
+    environment:
+      # 数据库配置
+      - DATABASE_URL=${DATABASE_URL}
+      # 应用和API配置
+      - NEXT_PUBLIC_API_URL=http://ai:8000 # 后端间通信，使用服务名，正确
+      - AI_SERVICE_URL=http://ai:8000 # 服务端API调用，使用服务名
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      # Logto认证配置
+      - NEXT_PUBLIC_LOGTO_ENDPOINT=${LOGTO_ENDPOINT} # 新增：确保Web应用也知道Logto的公网地址
+      - NEXT_PUBLIC_LOGTO_APP_ID=${NEXT_PUBLIC_LOGTO_APP_ID} # Logto应用ID
+      - LOGTO_APP_SECRET=${LOGTO_APP_SECRET} # Logto应用密钥
+      - LOGTO_COOKIE_SECRET=${LOGTO_COOKIE_SECRET} # Logto Cookie密钥
+      # NextAuth配置
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET} # NextAuth密钥
+      - NEXTAUTH_URL=${NEXT_PUBLIC_APP_URL} # 新增：通常NextAuth的URL就是应用的公网URL
+      # GitHub OAuth配置
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID} # GitHub OAuth客户端ID
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET} # GitHub OAuth密钥
+      # 腾讯云COS配置
+      - COS_SECRET_ID=${COS_SECRET_ID}
+      - COS_SECRET_KEY=${COS_SECRET_KEY}
+      - COS_BUCKET=${COS_BUCKET}
+      - COS_REGION=${COS_REGION}
+      - COS_BASE_URL=${COS_BASE_URL}
+    restart: unless-stopped
+    networks:
+      - services_network
+    
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  services_network:
+    driver: bridge

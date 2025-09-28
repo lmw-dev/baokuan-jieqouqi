@@ -1,0 +1,17 @@
+---
+description: "Defines the strategy for handling errors gracefully on the client side."
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+# Rule: Frontend Error Handling Specification (v2.0)
+
+## 1. Handling API Call Errors
+- **Centralized API Client:** All `fetch` calls must be wrapped in a centralized client (e.g., `lib/api-client.ts`). [cite: 92] This client is responsible for parsing the standard JSON error response from the backend. [cite: 93]
+- **Error Display Strategy:**
+  - **Form Errors:** For form submissions, display specific error messages inline next to the relevant field. [cite: 94]
+  - **Global Errors:** For global errors (e.g., 500 Internal Server Error, network failure), use a global notification system (e.g., Toast) to inform the user. [cite: 94]
+
+## 2. Handling Component Rendering Errors
+- **Use React Error Boundaries:** Wrap major UI sections or pages with an `<ErrorBoundary>` component to prevent the entire app from crashing due to a rendering error. [cite: 90]
+- The boundary must log the error and display a user-friendly fallback UI. [cite: 91]
+

@@ -1,0 +1,73 @@
+# 本地开发环境配置文件
+# 只包含基础设施服务：PostgreSQL、Redis、Logto
+# Web前端和AI后端需要在IDE中手动启动
+
+services:
+  # 1. 数据库服务 (PostgreSQL)
+  db:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - services_network
+
+  # 2. Redis服务 (为Logto使用)
+  redis_logto:
+    image: redis:7-alpine
+    container_name: redis_for_logto
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - services_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # 3. Logto认证服务
+  logto:
+    image: svhd/logto
+    container_name: logto_auth_service
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe 2>/dev/null || echo 'Database already initialized or seed failed, continuing...' && npm start"]
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    depends_on:
+      db:
+        condition: service_started
+      redis_logto:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/baokuan_logto
+      - REDIS_URL=redis://redis_logto:6379/0
+      - ENDPOINT=http://localhost:3001
+      - ADMIN_ENDPOINT=http://localhost:3002
+      - TRUST_PROXY_HEADER=1
+      - PORT=3001
+      - ADMIN_PORT=3002
+    networks:
+      - services_network
+
+volumes:
+  db_data:
+  redis_data:
+  logto_data:
+
+networks:
+  services_network:
+    driver: bridge

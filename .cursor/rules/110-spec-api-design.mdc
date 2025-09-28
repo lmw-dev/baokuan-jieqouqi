@@ -1,0 +1,68 @@
+---
+description: "This rule defines the design standards for all RESTful APIs within the project. The AI must adhere to these principles when creating or modifying API endpoints."
+globs: **/api/**/*.ts,**/api/**/*.py
+alwaysApply: false
+---
+# Rule: API Design Specification (v2.0)
+
+## 1. Core Principles: RESTful & Resource-Oriented
+- [cite_start]**HTTP Verbs:** Use standard HTTP methods correctly for CRUD operations (`GET`, `POST`, `PATCH`, `DELETE`). [cite: 55, 56]
+- [cite_start]**Resource Naming:** Use `kebab-case` and plural nouns for resource URLs (e.g., `/analysis-cards`). [cite: 57]
+
+## 2. Unified Response Format
+All API responses **must** follow this format. [cite_start]The HTTP status code indicates the transport-level outcome, while the `code` field indicates the business-level outcome. [cite: 58]
+```typescript
+interface ApiResponse<T> {
+  code: number;        // Business status code. 0 indicates success.
+  message: string;     // Response message.
+  data: T | null;      // Response data. Null on failure or if no data.
+}
+````
+
+## 3. Standard HTTP Status Codes
+
+- **200 OK**: General success for `GET`, `PATCH`. 5
+    
+- **201 Created**: Success after `POST`. 6
+    
+- **400 Bad Request**: Client-side validation error. 7
+    
+- **401 Unauthorized**: Authentication failed or missing. 8
+    
+- **403 Forbidden**: Authenticated but lacks permission. 9
+    
+- **404 Not Found**: Resource not found. 10
+    
+- **500 Internal Server Error**: Unexpected server error. 11
+    
+
+## 4. JSON Payload Naming Convention
+
+- All request and response bodies
+    
+    **must** use JSON. 12
+    
+- All keys/properties within the JSON body **must** use `camelCase` to maintain consistency with the frontend TypeScript conventions (e.g., `userId`, `cardTitle`).
+    
+
+## 5. Pagination for Collections
+
+- `GET` requests returning a list **must** support pagination via `page` and `pageSize` query parameters. 13
+    
+- The response
+    
+    `data` field for paginated lists must follow this structure: 14
+    
+
+TypeScript
+
+```
+{
+  "list": T[],
+  "pagination": {
+    "total": number,
+    "page": number,
+    "pageSize": number
+  }
+}
+```

@@ -1,0 +1,156 @@
+# Rule: Guide for Writing TASK Documents
+
+## Description
+This rule provides a lightweight template for independent developers to create task documents that serve as a quick decision-making tool and human-AI collaboration bridge. The task document focuses on business decisions, preparation work, and converting complex requirements into AI-executable instruction packages.
+
+## AI Action
+When prompted to create a task document, your primary action is to **create a new Markdown file**.
+
+- **File Location**: The new file **must** be saved in the `/docs/tasks/` directory at the monorepo root.
+- **File Naming**: The filename **must** follow the format: `[Task-ID]-task-[task-title-in-kebab-case].md`.
+  - **Example**: `TOM-199-task-user-authentication-system.md`
+
+The content of this new file must follow the template structure below.
+
+---
+
+## Template to Generate
+
+# [任务ID]:task:[任务标题]
+
+**模块**: [从Linear Issue的标签或标题中提取]
+**创建日期**: [YYYY-MM-DD]
+**状态**: 🔄 准备中 / ⚡ 执行中 / ✅ 已完成
+
+---
+
+## 🎯 **快速决策摘要** (Quick Decision Summary)
+
+### 业务决策
+- **优先级**: 🔴 高 / 🟡 中 / 🟢 低
+- **核心价值**: [一句话描述这个任务的核心价值]
+- **用户影响**: [这个任务对用户的直接影响]
+
+### 技术决策
+- **实现方式**: [核心技术方案]
+- **时间预估**: [预计时间]
+- **风险点**: [主要风险和应对策略]
+
+---
+
+## 🔑 **人机分工清单** (Human-AI Division)
+
+### 👨‍💼 **人类负责** (Human Tasks)
+*需要人类思考和决策的工作*
+
+**🎯 战略层面**:
+- [ ] [具体的业务决策或产品定位]
+- [ ] [具体的用户体验设计决策]
+- [ ] [具体的技术架构选择]
+
+**🔧 准备工作**:
+- [ ] [具体的环境或配置准备]
+- [ ] [具体的权限或访问设置]
+- [ ] [具体的测试数据准备]
+
+**📋 验收确认**:
+- [ ] [具体的最终验收标准确认]
+- [ ] [具体的质量标准确认]
+
+### 🤖 **AI负责** (AI Tasks)
+*交给AI自动化执行的工作*
+
+**💻 代码实现**:
+- 根据明确需求进行代码开发
+- 遵循项目规范和最佳实践
+- **编写完整的单元测试和集成测试**
+- **确保测试覆盖率达到80%以上**
+
+**🧪 测试验证**:
+- **编写并执行所有单元测试**
+- **确保100%测试通过率**
+- **验证代码质量和性能标准**
+- **生成测试覆盖率报告**
+
+**📝 文档输出**:
+- 代码注释和技术文档
+- **测试报告和覆盖率数据**
+- 实现过程记录
+- 问题解决方案记录
+
+**✅ 质量保证**:
+- **运行构建验证 (npm run build)**
+- **运行测试套件验证 (npm test)**
+- **修复所有linter错误**
+- **完成Prompt文档中的检查清单**
+
+---
+
+## 📦 **AI指令包** (AI Instruction Package)
+*当人类准备工作完成后，将此包作为完整指令交给AI执行*
+
+### 🎯 **执行目标**
+```
+[一段话清晰描述要完成的核心任务和预期结果]
+```
+
+### 📝 **业务背景**
+```
+[简洁的业务背景和用户价值说明]
+```
+
+### 🔧 **技术约束**
+```
+[关键的技术限制和要求]
+```
+
+### 🗂️ **上下文引用**
+```
+[关键文件和依赖的@引用路径]
+```
+
+### ✅ **验收标准**
+```
+[明确的、可测试的验收标准]
+```
+
+### 📊 **成功指标**
+```
+[可量化的成功指标]
+```
+
+---
+
+## 🔗 **文档链接** (Document Links)
+
+- **开发文档**: `docs/development/[Task-ID]-dev-[title].md`
+- **提示文档**: `docs/prompts/[Task-ID].prompt.[title].md`
+- **Linear Issue**: [链接]
+
+---
+
+## 📈 **执行记录** (Execution Log)
+
+### 时间记录
+- **开始时间**: [YYYY-MM-DD HH:MM]
+- **完成时间**: [YYYY-MM-DD HH:MM]
+- **实际耗时**: [X小时]
+
+### 决策记录
+| 时间 | 决策内容 | 原因 | 影响 |
+|------|----------|------|------|
+| [时间] | [决策] | [原因] | [影响] |
+
+### 完成确认
+- [ ] 功能验收通过
+- [ ] 质量标准达标
+- [ ] 文档更新完成
+
+---
+
+**📋 使用说明**: 本文档专注于快速决策和人机分工，技术实现细节请参考提示文档，完整过程记录请参考开发文档。
+- [ ] 文档更新完成
+
+---
+
+**📋 使用说明**: 本文档专注于快速决策和人机分工，技术实现细节请参考提示文档，完整过程记录请参考开发文档。

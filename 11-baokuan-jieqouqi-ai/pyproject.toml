@@ -1,0 +1,24 @@
+# pyproject.toml
+
+[tool.ruff]
+# 设置我们代码的目标Python版本
+target-version = "py313"
+
+# 设置代码行的最大长度。88是Black工具推广的、非常受欢迎的现代标准。
+line-length = 88
+
+[tool.ruff.lint]
+# 选择要启用的规则集。这是一个非常好的、通用的起点。
+# E, W: pycodestyle的错误和警告
+# F: Pyflakes的错误
+# I: isort，用于自动排序import语句
+# UP: pyupgrade，用于将代码升级到新的语法
+select = ["E", "W", "F", "I", "UP"]
+
+# 如果有特别不想要的规则，可以在这里忽略
+# ignore = []
+
+[tool.ruff.format]
+# 这是格式化器的配置区，我们通常使用Ruff的默认值，它与Black工具高度兼容。
+# 如果有特殊需求可以在此添加，例如：
+# quote-style = "double"

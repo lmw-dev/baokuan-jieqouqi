@@ -1,0 +1,39 @@
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Environments
+.env
+.env*.local
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# --- Python / AI Service ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# --- Node.js / Web Service ---
+node_modules/
+.pnpm-store
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# --- Logs ---
+logs
+*.log
+
+.env.*
+.env

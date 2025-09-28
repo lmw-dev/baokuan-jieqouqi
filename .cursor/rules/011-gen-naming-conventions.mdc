@@ -1,0 +1,62 @@
+---
+description: 
+globs: **/*.ts,**/*.tsx,**/*.py
+alwaysApply: false
+---
+# Rule: Unified Naming Conventions (V2.0)
+
+## Description
+This document defines the strict naming conventions for all code across all projects. The AI must adhere to these rules at all times. These rules are based on official framework conventions (Next.js) and authoritative industry style guides (Airbnb, Google, PEP 8).
+
+---
+
+## 1. TypeScript / JavaScript Naming Conventions (web project)
+
+### 1.1 Code Identifiers (Variables, Functions, etc.)
+(Based on Google & Airbnb Style Guides)
+
+- **Variables, Functions, Props, & Methods:** Use `camelCase`.
+  - **Good:** `const userName = 'test';`, `function calculateTotal() {}`
+  - **Bad:** `const User_Name = 'test';`
+
+- **Classes, Interfaces, Type Aliases, Enums:** Use `PascalCase`.
+  - **Good:** `class UserManager {}`, `interface UserProfile {}`
+  - **Bad:** `class userManager {}`
+
+- **Constants (reused, hardcoded values):** Use `UPPER_CASE_SNAKE_CASE`.
+  - **Good:** `const API_BASE_URL = '/api';`
+  - **Bad:** `const apiBaseUrl = '/api';`
+
+### 1.2 File Names
+(Based on Next.js & Community Best Practices)
+
+- **Next.js App Router Special Files:** Use `lowercase`.
+  - **Required:** `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `template.tsx`, `not-found.tsx`
+
+- **React Component Files:** Use `PascalCase.tsx`.
+  - **Good:** `UserProfileCard.tsx`, `Header.tsx`
+  - **Bad:** `user-profile-card.tsx`
+
+- **All Other Code Files (hooks, utils, services, etc.):** Use `kebab-case.ts`.
+  - **Good:** `use-auth-hook.ts`, `api-helpers.ts`
+  - **Bad:** `useAuthHook.ts`, `api_helpers.ts`
+
+---
+
+## 2. Python Naming Conventions (ai project)
+
+(Based on PEP 8 Style Guide)
+
+- **Variables, Functions, Methods, and Modules (Files):** Use `snake_case`.
+  - **Good:** `user_name = 'test'`, `def calculate_total():`, `api_helpers.py`
+  - **Bad:** `userName = 'test'`, `api-helpers.py`
+
+- **Classes:** Use `PascalCase` (CapWords).
+  - **Good:** `class UserManager:`
+  - **Bad:** `class user_manager:`
+
+- **Constants:** Use `UPPER_CASE_SNAKE_CASE`.
+  - **Good:** `API_BASE_URL = '/api'`
+  - **Bad:** `api_base_url = '/api'`
+
+- **Private Attributes:** Use a single leading underscore: `self._internal_state`.
